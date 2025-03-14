@@ -2,6 +2,7 @@ plugins {
     id("java")
     id("org.jetbrains.kotlin.jvm") version "1.9.24"
     id("org.jetbrains.intellij") version "1.17.3"
+
 }
 
 group = "com.gpt"
@@ -19,6 +20,11 @@ intellij {
 
     plugins.set(listOf("com.intellij.java"))
 }
+
+java {
+    toolchain.languageVersion.set(JavaLanguageVersion.of(17))
+}
+
 
 tasks {
     // Set the JVM compatibility versions
@@ -44,4 +50,10 @@ tasks {
     publishPlugin {
         token.set(System.getenv("PUBLISH_TOKEN"))
     }
+}
+
+dependencies {
+    implementation("com.squareup.okhttp3:okhttp:4.11.0")
+    implementation("com.google.code.gson:gson:2.10.1")
+
 }

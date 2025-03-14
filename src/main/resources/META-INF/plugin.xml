@@ -27,4 +27,12 @@
     <extensions defaultExtensionNs="com.intellij">
 
     </extensions>
+
+    <actions>
+        <action id="CodeReviewAction" class="com.codereview.CodeReviewAction" text="Code Review">
+            <add-to-group group-id="EditorPopupMenu" anchor="first"/>
+            <keyboard-shortcut first-keystroke="alt shift R" keymap="$default"/>
+        </action>
+    </actions>
+
 </idea-plugin>
