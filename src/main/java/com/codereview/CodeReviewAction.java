@@ -70,7 +70,7 @@ public class CodeReviewAction extends AnAction {
 
             // 선택된 코드 표시
             JTextArea codeArea = new JTextArea(selectedCode);
-            codeArea.setEditable(false);
+            //codeArea.setEditable(false);
             codeArea.setLineWrap(true);
             codeArea.setWrapStyleWord(true);
             panel.add(new JScrollPane(codeArea), BorderLayout.CENTER);
@@ -138,7 +138,46 @@ public class CodeReviewAction extends AnAction {
                 if (!response.isSuccessful()) {
                     return "API 요청 실패: " + response.code();
                 }
-                return response.body().string();
+
+                // JSON 문자열로 변환
+                String responseString = response.body().string();
+                // JSON 문자열을 Map으로 변환
+                Map<String, Object> responseBody = gson.fromJson(responseString, Map.class);
+                if (response == null || !responseBody.containsKey("candidates")) {
+                    return "AI 리뷰를 가져오는데 실패했습니다.";
+                }
+
+                List<Map<String, Object>> candidates = (List<Map<String, Object>>) responseBody.get("candidates");
+                if (candidates == null || candidates.isEmpty()) {
+                    return "AI 리뷰 응답의 'candidates' 필드가 비어있거나 null입니다.";
+                }
+
+                Map<String, Object> candidate = candidates.get(0);
+                if (candidate == null || !candidate.containsKey("content")) {
+                    return "AI 리뷰 응답의 'candidate'가 null이거나 'content' 필드가 없습니다.";
+                }
+
+                Map<String, Object> contentResponse = (Map<String, Object>) candidate.get("content");
+                if (contentResponse == null || !contentResponse.containsKey("parts")) {
+                    return "AI 리뷰 응답의 'content'가 null이거나 'parts' 필드가 없습니다.";
+                }
+
+                List<Map<String, Object>> partsResponse = (List<Map<String, Object>>) contentResponse.get("parts");
+                if (partsResponse == null || partsResponse.isEmpty()) {
+                    return "AI 리뷰 응답의 'parts' 필드가 비어있거나 null입니다.";
+                }
+
+                Map<String, Object> partResponse = partsResponse.get(0);
+                if (partResponse == null || !partResponse.containsKey("text")) {
+                    return "AI 리뷰 응답의 'part'가 null이거나 'text' 필드가 없습니다.";
+                }
+
+                String review = (String) partResponse.get("text");
+                if (review == null || review.isEmpty()) {
+                    return "AI 리뷰 응답의 'text' 필드가 비어있거나 null입니다.";
+                }
+
+                return review;
             } catch (IOException e) {
                 e.printStackTrace();
                 return "API 호출 중 오류 발생: " + e.getMessage();
