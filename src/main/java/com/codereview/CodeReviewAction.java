@@ -55,6 +55,8 @@ public class CodeReviewAction extends AnAction {
         private final Project project;
         private final String selectedCode;
         private JTextArea questionField;
+        private JTextArea answerField;
+        private JButton sendButton;
 
         protected CodeReviewDialog(@Nullable Project project, String selectedCode) {
             super(project);
@@ -68,17 +70,22 @@ public class CodeReviewAction extends AnAction {
         protected @Nullable JComponent createCenterPanel() {
             JPanel panel = new JPanel(new BorderLayout());
 
-            // 선택된 코드 표시
-            JTextArea codeArea = new JTextArea(selectedCode);
-            //codeArea.setEditable(false);
-            codeArea.setLineWrap(true);
-            codeArea.setWrapStyleWord(true);
-            panel.add(new JScrollPane(codeArea), BorderLayout.CENTER);
-
             // 질문 입력 필드
-            questionField = new JTextArea(3, 50);
+            questionField = new JTextArea(selectedCode, 50, 80);
             questionField.setBorder(BorderFactory.createTitledBorder("질문 입력"));
-            panel.add(questionField, BorderLayout.SOUTH);
+            questionField.setEditable(true);
+            questionField.setLineWrap(true);
+            questionField.setWrapStyleWord(true);
+            panel.add(new JScrollPane(questionField), BorderLayout.WEST);
+
+            // 답변 필드
+            answerField = new JTextArea(50, 80);
+            answerField.setBorder(BorderFactory.createTitledBorder("AI 답변"));
+            answerField.setEditable(false);
+            answerField.setLineWrap(true);
+            answerField.setWrapStyleWord(true);
+            panel.add(new JScrollPane(answerField), BorderLayout.EAST);
+
 
             return panel;
         }
@@ -86,26 +93,25 @@ public class CodeReviewAction extends AnAction {
         @Override
         protected JComponent createSouthPanel() {
             JPanel buttonPanel = new JPanel();
-            JButton sendButton = new JButton("전송");
-            sendButton.addActionListener(e -> {
-                String question = questionField.getText();
-                if (question.isEmpty()) {
-                    Messages.showMessageDialog(project, "질문을 입력하세요.", "Error", Messages.getErrorIcon());
-                    return;
-                }
-
-                // AI 리뷰 요청
-                String response = getAIReview(selectedCode, question);
-
-                // result 표시
-                Messages.showMessageDialog(project, response, "AI Review", Messages.getInformationIcon());
-            });
-
+            sendButton = new JButton("전송");
+            sendButton.addActionListener(e -> handleSendButtonClick());
             buttonPanel.add(sendButton);
             return buttonPanel;
         }
 
-        private String getAIReview(String selectedText, String question) {
+        private void handleSendButtonClick() {
+            String question = questionField.getText();
+            if (question.isEmpty()) {
+                Messages.showMessageDialog(project, "질문을 입력하세요.", "Error", Messages.getErrorIcon());
+                return;
+            }
+
+            // AI 리뷰 요청
+            String response = getAIReview(selectedCode);
+            answerField.setText(response);
+        }
+
+        private String getAIReview(String selectedText) {
             OkHttpClient client = new OkHttpClient();
             MediaType JSON = MediaType.get("application/json; charset=utf-8");
 
@@ -114,7 +120,7 @@ public class CodeReviewAction extends AnAction {
             Map<String, Object> content = new HashMap<>();
             List<Map<String, Object>> parts = new ArrayList<>();
             Map<String, Object> part = new HashMap<>();
-            part.put("text", "당신은 Java Spring Boot 전문가입니다. 코드를 분석하고 리뷰를 작성하세요. 모든 응답은 반드시 한국어로 작성하세요. \n\n" + selectedText + question);
+            part.put("text", "당신은 Java Spring Boot 전문가입니다. 코드를 분석하고 리뷰를 작성하세요. 모든 응답은 반드시 한국어로 작성하세요. \n\n" + selectedText);
             parts.add(part);
             content.put("parts", parts);
             contents.add(content);
