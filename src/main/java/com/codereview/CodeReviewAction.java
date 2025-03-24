@@ -72,8 +72,8 @@ public class CodeReviewAction extends AnAction {
 
             // 질문 입력 필드
             questionField = new JTextArea(selectedCode, 50, 80);
-            questionField.setBorder(BorderFactory.createTitledBorder("질문 입력"));
-            questionField.setEditable(true);
+            questionField.setBorder(BorderFactory.createTitledBorder("질문 코드"));
+            questionField.setEditable(false);
             questionField.setLineWrap(true);
             questionField.setWrapStyleWord(true);
             panel.add(new JScrollPane(questionField), BorderLayout.WEST);
