@@ -1,5 +1,6 @@
 package com.codereview;
 
+import com.codereview.config.ApiKeyManager;
 import com.google.gson.Gson;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
@@ -22,8 +23,6 @@ import java.util.List;
 import java.util.Map;
 
 public class CodeReviewAction extends AnAction {
-
-    private static final String GEMINI_API_KEY = "";
     private static final String GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
 
     @Override
@@ -112,6 +111,8 @@ public class CodeReviewAction extends AnAction {
         }
 
         private String getAIReview(String selectedText) {
+//            final String GEMINI_API_KEY = ApiKeyManager.getApiKey();
+            final String GEMINI_API_KEY = "";
             OkHttpClient client = new OkHttpClient();
             MediaType JSON = MediaType.get("application/json; charset=utf-8");
 
@@ -120,7 +121,7 @@ public class CodeReviewAction extends AnAction {
             Map<String, Object> content = new HashMap<>();
             List<Map<String, Object>> parts = new ArrayList<>();
             Map<String, Object> part = new HashMap<>();
-            part.put("text", "당신은 Java Spring Boot 전문가입니다. 코드를 분석하고 리뷰를 작성하세요. 모든 응답은 반드시 한국어로 작성하세요. \n\n" + selectedText);
+            part.put("text", "당신은 웹 개발자 전문가입니다. 코드를 분석하고 리뷰를 작성하세요. 모든 응답은 반드시 한국어로 작성하세요. \n\n" + selectedText);
             parts.add(part);
             content.put("parts", parts);
             contents.add(content);
@@ -136,7 +137,7 @@ public class CodeReviewAction extends AnAction {
             Request request = new Request.Builder()
                     .url(GEMINI_API_URL)
                     .post(body)
-                    .addHeader("Content-Type", "application-json")
+                    .addHeader("Content-Type", "application/json")
                     .addHeader("x-goog-api-key", GEMINI_API_KEY)
                     .build();
 
